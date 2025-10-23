@@ -1,109 +1,168 @@
 # NEWS-DB-VECTOR-API
 
-A FastAPI application for news embedding generation and semantic similarity search using Google's Generative AI (text-embedding-004) and PostgreSQL with pgvector extension.
+A FastAPI application for news embedding generation and similarity search using Google's Gemini AI and PostgreSQL with pgvector extension.
 
 ## Features
 
-- 🚀 **News Embedding Generation** - Generate vector embeddings from news descriptions using Google's text-embedding-004 model
+- 🚀 **News Embedding Generation** - Generate embeddings using Google's text-embedding-004 model
 - 🔍 **Semantic Similarity Search** - Find similar news articles using cosine similarity
-- 📦 **Batch Processing** - Generate embeddings for multiple news items at once
-- 🐳 **Docker Ready** - Complete Docker and Docker Compose setup
-- 🗄️ **PostgreSQL + pgvector** - Vector database support for efficient similarity search
-- 📊 **Health Monitoring** - Built-in health check endpoints
-
-## Prerequisites
-
-- Python 3.11+
-- PostgreSQL with pgvector extension
-- Google Gemini API Key
-- Docker & Docker Compose (for containerized deployment)
+- 📊 **Batch Processing** - Generate embeddings for multiple news items at once
+- 🐳 **Docker Support** - Containerized deployment with Docker and Docker Compose
+- 📦 **PostgreSQL with pgvector** - Vector similarity search in database
+- 🔒 **Production Ready** - Security best practices, health checks, and error handling
 
 ## Quick Start with Docker (Recommended)
 
-1. **Clone the repository**
-```bash
-git clone https://github.com/objn/news-db-vector-api.git
-cd news-db-vector-api
-```
+### Prerequisites
+- Docker Desktop installed
+- Docker Compose installed
 
-2. **Set up environment variables**
-```bash
+### Setup and Run
+
+1. **Clone the repository** (if not already done)
+
+2. **Configure environment variables:**
+```cmd
 copy .env.example .env
 ```
-Edit `.env` with your configuration:
+
+Edit `.env` file with your actual values:
 ```env
 NODE_ENV=production
 DATABASE_URL=postgresql://postgres:your_password@postgres:5432/news_db
-POSTGRES_DB=news_db
-POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your_secure_password
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-3. **Start the application**
-```bash
+3. **Start the application:**
+```cmd
 docker-compose up -d
 ```
 
-4. **Check the logs**
-```bash
+4. **Check if services are running:**
+```cmd
+docker-compose ps
 docker-compose logs -f api
 ```
 
-The API will be available at `http://localhost:8000`
+5. **Access the API:**
+- API: http://localhost:8000
+- Interactive API docs (Swagger UI): http://localhost:8000/docs
+- Alternative API docs (ReDoc): http://localhost:8000/redoc
 
 ### Docker Commands
 
-```bash
-# Stop services
+**Stop services:**
+```cmd
 docker-compose down
+```
 
-# Rebuild after code changes
+**Rebuild after code changes:**
+```cmd
 docker-compose up -d --build
+```
 
-# View running containers
-docker-compose ps
-
-# Access API container shell
-docker-compose exec api bash
-
-# View PostgreSQL logs
+**View logs:**
+```cmd
+docker-compose logs -f api
 docker-compose logs -f postgres
 ```
 
-## Local Development Setup
-
-1. **Create and activate virtual environment**
-```bash
-python -m venv venv
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
+**Restart services:**
+```cmd
+docker-compose restart
 ```
 
-2. **Install dependencies**
-```bash
+**Remove all (including volumes):**
+```cmd
+docker-compose down -v
+```
+
+## Local Development Setup (Without Docker)
+
+### Prerequisites
+- Python 3.11+
+- PostgreSQL with pgvector extension
+- Google Gemini API key
+
+### Setup
+
+1. **Create and activate virtual environment:**
+```cmd
+python -m venv venv
+venv\Scripts\activate
+```
+
+2. **Install dependencies:**
+```cmd
 pip install -r requirements.txt
 ```
 
-3. **Set up environment variables**
-```bash
+3. **Configure environment variables:**
+```cmd
 copy .env.example .env
 ```
-Edit `.env` with your local database configuration.
 
-4. **Run database migrations** (if applicable)
-```bash
-alembic upgrade head
+Edit `.env` with your database and API credentials.
+
+4. **Setup database:**
+```cmd
+REM Run the SQL setup script in your PostgreSQL database
+psql -U postgres -d news_db -f PGVECTOR_SETUP.sql
 ```
 
-5. **Start the development server**
-```bash
-# Development mode (with auto-reload)
-uvicorn main:app --reload
+### Running the Application
 
-# Or run directly
+**Development Mode (with auto-reload):**
+```cmd
+uvicorn main:app --reload
+```
+
+**Production Mode:**
+```cmd
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+**Run directly with Python:**
+```cmd
 python main.py
 ```
+
+## API Endpoints
+
+### Health & Info
+- `GET /` - Root endpoint, welcome message
+- `GET /health` - Health check endpoint
+- `GET /config` - Get current configuration (sanitized)
+- `GET /db/test` - Test database connection
+
+### Embedding Generation
+- `POST /news-embedding` - Generate embedding from text
+  ```json
+  {
+    "news_desc": "Your news text here"
+  }
+  ```
+
+- `POST /news-embedding-id/` - Generate and save embedding by news ID
+  ```json
+  {
+    "news_id": "news_id_here"
+  }
+  ```
+
+- `POST /news-embedding/batch/all` - Generate embeddings for all news without embeddings
+
+### Similarity Search
+- `POST /news-similarity-compare` - Compare embeddings and find similar news
+  ```json
+  {
+    "news_desc": "Text to find similar news",
+    "embedding": "",  // Optional: provide pre-computed embedding
+    "threshold": 0.7,  // Minimum similarity score (0-1)
+    "top_k": 10  // Number of results to return
+  }
+  ```
 
 ## API Documentation
 
@@ -111,44 +170,24 @@ Once the server is running, visit:
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
-## API Endpoints
+## Project Structure
 
-### General
-
-- `GET /` - Root endpoint, welcome message
-- `GET /health` - Health check endpoint
-- `GET /config` - Get current configuration (sanitized)
-- `GET /db/test` - Test database connection
-
-### Embedding Generation
-
-- `POST /news-embedding` - Generate embedding from text
-  ```json
-  {
-    "news_desc": "Your news description text here"
-  }
-  ```
-
-- `POST /news-embedding-id/` - Generate and save embedding for a specific news ID
-  ```json
-  {
-    "news_id": "NEWS123"
-  }
-  ```
-
-- `POST /news-embedding/batch/all` - Generate embeddings for all news without embeddings
-
-### Similarity Search
-
-- `POST /news-similarity-compare` - Compare embeddings and find similar news
-  ```json
-  {
-    "news_desc": "Search query text",
-    "embedding": "[optional embedding array]",
-    "threshold": 0.7,
-    "top_k": 10
-  }
-  ```
+```
+NEWS-DB-VECTOR-API/
+├── main.py                 # FastAPI application and routes
+├── config.py              # Configuration and environment variables
+├── database.py            # Database connection and session management
+├── models.py              # SQLAlchemy models
+├── embedding_service.py   # Google Gemini embedding service
+├── request_class.py       # Pydantic request/response models
+├── requirements.txt       # Python dependencies
+├── Dockerfile            # Docker image definition
+├── docker-compose.yml    # Docker Compose configuration
+├── .dockerignore         # Docker build context exclusions
+├── .env.example          # Environment variables template
+├── PGVECTOR_SETUP.sql    # PostgreSQL pgvector setup script
+└── README.md             # This file
+```
 
 ## Environment Variables
 
@@ -157,146 +196,25 @@ Once the server is running, visit:
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
 | `GEMINI_API_KEY` | Google Gemini API key for embeddings | Yes |
 | `NODE_ENV` | Environment (development/production) | No (default: development) |
-| `POSTGRES_DB` | PostgreSQL database name (Docker only) | Yes (Docker) |
-| `POSTGRES_USER` | PostgreSQL username (Docker only) | Yes (Docker) |
-| `POSTGRES_PASSWORD` | PostgreSQL password (Docker only) | Yes (Docker) |
+| `POSTGRES_DB` | PostgreSQL database name (Docker only) | No (default: news_db) |
+| `POSTGRES_USER` | PostgreSQL user (Docker only) | No (default: postgres) |
+| `POSTGRES_PASSWORD` | PostgreSQL password (Docker only) | Yes (for Docker) |
 
-## Database Setup
-
-The application requires PostgreSQL with the pgvector extension. See `PGVECTOR_SETUP.sql` for the database schema.
-
-When using Docker Compose, the database is automatically set up with pgvector.
-
-For manual setup:
-```bash
-# Connect to PostgreSQL
-psql -U postgres
-
-# Create database
-CREATE DATABASE news_db;
-
-# Enable pgvector extension
-\c news_db
-CREATE EXTENSION vector;
-
-# Run the setup script
-\i PGVECTOR_SETUP.sql
-```
-
-## Technology Stack
+## Technologies
 
 - **FastAPI** - Modern, fast web framework for building APIs
-- **Uvicorn** - ASGI server implementation
+- **Uvicorn** - Lightning-fast ASGI server
 - **SQLAlchemy** - SQL toolkit and ORM
-- **PostgreSQL** - Relational database
-- **pgvector** - Vector similarity search extension
-- **Google Generative AI** - Text embedding model (text-embedding-004)
+- **PostgreSQL** - Powerful relational database
+- **pgvector** - PostgreSQL extension for vector similarity search
+- **Google Gemini AI** - text-embedding-004 model for embeddings
 - **Pydantic** - Data validation using Python type annotations
 - **Docker** - Containerization platform
 
-## Project Structure
-
-```
-NEWS-DB-VECTOR-API/
-├── main.py                 # FastAPI application entry point
-├── config.py              # Configuration and environment variables
-├── database.py            # Database connection and session management
-├── models.py              # SQLAlchemy models
-├── embedding_service.py   # Embedding generation and similarity logic
-├── request_class.py       # Pydantic request/response models
-├── requirements.txt       # Python dependencies
-├── Dockerfile            # Docker image configuration
-├── docker-compose.yml    # Docker Compose orchestration
-├── .dockerignore         # Docker build context exclusions
-├── .env.example          # Environment variables template
-├── PGVECTOR_SETUP.sql    # Database schema and setup
-└── README.md             # This file
-```
-
-## Development
-
-### Running Tests
-```bash
-pytest
-```
-
-### Code Formatting
-```bash
-black .
-```
-
-### Linting
-```bash
-flake8 .
-```
-
-## Production Deployment
-
-### Using Docker
-
-1. Build the image:
-```bash
-docker build -t news-db-vector-api:latest .
-```
-
-2. Run the container:
-```bash
-docker run -d \
-  -p 8000:8000 \
-  --env-file .env \
-  --name news-vector-api \
-  news-db-vector-api:latest
-```
-
-### Using Docker Compose
-
-Simply use the provided `docker-compose.yml`:
-```bash
-docker-compose up -d
-```
-
-## Health Checks
-
-The application includes built-in health checks:
-
-- **HTTP**: `GET /health`
-- **Docker**: Automatic health check configured in Dockerfile
-- **Docker Compose**: Health check with dependency management
-
-## Troubleshooting
-
-### Database Connection Issues
-```bash
-# Check if PostgreSQL is running
-docker-compose ps
-
-# View database logs
-docker-compose logs postgres
-
-# Test connection manually
-docker-compose exec postgres psql -U postgres -d news_db
-```
-
-### API Container Issues
-```bash
-# View API logs
-docker-compose logs api
-
-# Restart API service
-docker-compose restart api
-
-# Rebuild and restart
-docker-compose up -d --build api
-```
-
 ## License
 
-[Add your license here]
+This project is licensed under the MIT License.
 
 ## Contributing
 
-[Add contribution guidelines here]
-
-## Contact
-
-[Add contact information here]
+Contributions are welcome! Please feel free to submit a Pull Request.
