@@ -78,6 +78,41 @@ docker-compose restart
 docker-compose down -v
 ```
 
+## Jenkins/CI-CD Deployment
+
+For production deployment with Jenkins, see the complete guide: **[JENKINS_DEPLOYMENT.md](JENKINS_DEPLOYMENT.md)**
+
+### Quick Jenkins Deployment
+
+**Using deployment scripts:**
+```cmd
+REM Windows
+deploy.bat
+
+REM Linux/Mac
+chmod +x deploy.sh
+./deploy.sh
+```
+
+**Using Docker Compose (Production):**
+```cmd
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+The deployment scripts automatically:
+- ✅ Create `.env` from environment variables or Jenkins credentials
+- ✅ Build Docker image with proper tagging
+- ✅ Mount `.env` file as volume for runtime configuration
+- ✅ Deploy with health checks
+- ✅ Verify deployment success
+
+See **[JENKINS_DEPLOYMENT.md](JENKINS_DEPLOYMENT.md)** for:
+- Complete Jenkinsfile pipeline
+- Troubleshooting .env detection issues
+- Volume mounting strategies
+- Environment variable handling
+- Best practices for CI/CD
+
 ## Local Development Setup (Without Docker)
 
 ### Prerequisites
