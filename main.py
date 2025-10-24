@@ -11,10 +11,6 @@ import json
 
 app = FastAPI(title="NEWS-DB-VECTOR-API", redirect_slashes=False)
 
-def craft_api_path(path: str) -> str:
-    api_path = f"{settings.STARTUP_API_PATH}/{path}{{slash:/?}}"
-    return api_path
-
 # Test database connection on startup
 @app.on_event("startup")
 async def startup_event():
@@ -27,14 +23,14 @@ async def root():
     """Root endpoint"""
     return {"message": "Welcome to NEWS-DB-VECTOR-API"}
 
-
-@app.get(craft_api_path("health"), response_model=HealthResponse)
+@app.get(f"/health", response_model=HealthResponse)
+@app.get(f"/health/", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint"""
     return HealthResponse(status="healthy", message="Service is running")
 
-
-@app.get(craft_api_path("config"))
+@app.get(f"{settings.STARTUP_API_PATH}/config")
+@app.get(f"{settings.STARTUP_API_PATH}/config/")
 async def get_config():
     """Get current configuration (sanitized)"""
     return {
@@ -42,8 +38,8 @@ async def get_config():
         "database_configured": bool(settings.DATABASE_URL)
     }
 
-
-@app.get(craft_api_path("db/test"))
+@app.get(f"{settings.STARTUP_API_PATH}/db/test")
+@app.get(f"{settings.STARTUP_API_PATH}/db/test/")
 async def test_db_connection():
     """Test database connection"""
     try:
@@ -55,7 +51,8 @@ async def test_db_connection():
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-@app.post(craft_api_path("embedding"))
+@app.post(f"{settings.STARTUP_API_PATH}/embedding")
+@app.post(f"{settings.STARTUP_API_PATH}/embedding/")
 async def create_news_embedding(request: NewsEmbeddingRequest):
     """Create a news embedding using Google AI Studio"""
     try:
@@ -77,7 +74,8 @@ async def create_news_embedding(request: NewsEmbeddingRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating embedding: {str(e)}")
 
-@app.post(craft_api_path("embedding-id"))
+@app.post(f"{settings.STARTUP_API_PATH}/embedding-id")
+@app.post(f"{settings.STARTUP_API_PATH}/embedding-id/")
 async def create_news_embedding_by_id(request: NewsEmbeddingRequest_ID, db: Session = Depends(get_db)):
     """Search news by ID, generate embedding from news_desc, and save to database"""
     try:
@@ -144,8 +142,8 @@ async def create_news_embedding_by_id(request: NewsEmbeddingRequest_ID, db: Sess
         print(f"Error details: {error_details}")
         raise HTTPException(status_code=500, detail=f"Error creating news embedding: {str(e)}")
 
-
-@app.post(craft_api_path("embedding/batch/all"))
+@app.post(f"{settings.STARTUP_API_PATH}/embedding/batch/all")
+@app.post(f"{settings.STARTUP_API_PATH}/embedding/batch/all/")
 async def create_embeddings_for_all_news(db: Session = Depends(get_db)):
     """Generate embeddings for all news that don't have embeddings yet"""
     try:
@@ -219,7 +217,8 @@ async def create_embeddings_for_all_news(db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error batch creating embeddings: {str(e)}")
 
-@app.post(craft_api_path("similarity-compare"))
+@app.post(f"{settings.STARTUP_API_PATH}/similarity-compare")
+@app.post(f"{settings.STARTUP_API_PATH}/similarity-compare/")
 async def compare_embeddings(request: EmbeddingCompareRequest, db: Session = Depends(get_db)):
     """Compare embeddings for similarity with news in database using PostgreSQL vector operations"""
     try:
