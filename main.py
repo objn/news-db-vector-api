@@ -24,7 +24,7 @@ async def root():
     return {"message": "Welcome to NEWS-DB-VECTOR-API"}
 
 
-@app.get(f"{settings.STARTUP_API_PATH}/health", response_model=HealthResponse)
+@app.get(f"/health", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint"""
     return HealthResponse(status="healthy", message="Service is running")
