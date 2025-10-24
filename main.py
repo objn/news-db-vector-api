@@ -51,7 +51,7 @@ async def test_db_connection():
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-@app.post(f"{settings.STARTUP_API_PATH}/news-embedding")
+@app.post(f"{settings.STARTUP_API_PATH}/embedding")
 async def create_news_embedding(request: NewsEmbeddingRequest):
     """Create a news embedding using Google AI Studio"""
     try:
@@ -73,7 +73,7 @@ async def create_news_embedding(request: NewsEmbeddingRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating embedding: {str(e)}")
 
-@app.post(f"{settings.STARTUP_API_PATH}/news-embedding-id/")
+@app.post(f"{settings.STARTUP_API_PATH}/embedding-id/")
 async def create_news_embedding_by_id(request: NewsEmbeddingRequest_ID, db: Session = Depends(get_db)):
     """Search news by ID, generate embedding from news_desc, and save to database"""
     try:
@@ -141,7 +141,7 @@ async def create_news_embedding_by_id(request: NewsEmbeddingRequest_ID, db: Sess
         raise HTTPException(status_code=500, detail=f"Error creating news embedding: {str(e)}")
 
 
-@app.post(f"{settings.STARTUP_API_PATH}/news-embedding/batch/all")
+@app.post(f"{settings.STARTUP_API_PATH}/embedding/batch/all")
 async def create_embeddings_for_all_news(db: Session = Depends(get_db)):
     """Generate embeddings for all news that don't have embeddings yet"""
     try:
@@ -215,7 +215,7 @@ async def create_embeddings_for_all_news(db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error batch creating embeddings: {str(e)}")
 
-@app.post(f"{settings.STARTUP_API_PATH}/news-similarity-compare")
+@app.post(f"{settings.STARTUP_API_PATH}/similarity-compare")
 async def compare_embeddings(request: EmbeddingCompareRequest, db: Session = Depends(get_db)):
     """Compare embeddings for similarity with news in database using PostgreSQL vector operations"""
     try:
