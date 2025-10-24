@@ -15,8 +15,8 @@ app = FastAPI(title="NEWS-DB-VECTOR-API")
 @app.on_event("startup")
 async def startup_event():
     print("\n🚀 Starting up...")
+    print("\n Startup api path:", settings.STARTUP_API_PATH)
     test_connection()
-
 
 @app.get(f"{settings.STARTUP_API_PATH}/")
 async def root():
