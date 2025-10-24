@@ -7,8 +7,6 @@ WORKDIR /app
 # Install system dependencies required for building Python packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    g++ \
-    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
@@ -36,6 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy Python packages from builder
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=builder .env /app/.env
 
 # Copy application code
 COPY --chown=appuser:appuser . .
