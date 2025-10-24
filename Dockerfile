@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy requirements first for better caching
 COPY requirements.txt .
+COPY env ./.env
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
@@ -34,7 +35,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy Python packages from builder
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
-COPY --from=builder env /app/.env
 
 # Copy application code
 COPY --chown=appuser:appuser . .
