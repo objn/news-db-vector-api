@@ -28,6 +28,7 @@ class Settings:
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
     NODE_ENV: str = os.getenv("NODE_ENV", "development")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    STARTUP_API_PATH: str = os.getenv("STARTUP_API_PATH", "/api/v1/news/vec")
     
     def __init__(self):
         print("\n" + "="*50)
