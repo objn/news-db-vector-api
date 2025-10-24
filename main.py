@@ -9,7 +9,7 @@ from embedding_service import generate_embedding, cosine_similarity
 from models import News
 import json
 
-app = FastAPI(title="NEWS-DB-VECTOR-API")
+app = FastAPI(title="NEWS-DB-VECTOR-API", redirect_slashes=False)
 
 # Test database connection on startup
 @app.on_event("startup")
